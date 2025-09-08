@@ -6,6 +6,7 @@ import { Textarea } from "../components/ui/textarea";
 import { Switch } from "../components/ui/switch";
 import { Label } from "../components/ui/label";
 import { motion } from "framer-motion";
+import axios from "axios";
 
 
 import {
@@ -23,6 +24,7 @@ import {
 
 
 const AddProduct = () => {
+   const backend_url =import.meta.env.VITE_BACKEND_URL;
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -49,6 +51,41 @@ const handleImageUpload = (e) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    const formData = new FormData();
+    formData.append("title", form.title);
+    formData.append("description", form.description);
+    formData.append("price", form.price);
+    formData.append("category", form.category);
+    formData.append("latest", form.latest);
+    form.images.forEach((image, index) => {
+      formData.append(`images`, image);
+    });
+
+    axios.post(`${backend_url}/product`, formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    }).then((response) => {
+      console.log("Product added successfully:", response.data);
+      setForm({
+        title: "",
+        description: "",
+        price: "",
+        category: "",
+        images: [],
+        latest: false,
+      });
+    }).catch((error) => {
+  if (error.response) {
+    console.error("Backend error:", error.response.data);
+  } else {
+    console.error("Axios error:", error.message);
+  }
+});
+
+
+
+    
   
    
   };
@@ -106,19 +143,23 @@ const handleImageUpload = (e) => {
 
             <div>
              <Label className="text-gray-700 my-4">Category</Label>
-                    <Select>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select a category" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectGroup>
-                          <SelectLabel>Categories</SelectLabel>
-                          <SelectItem  value="women">Women</SelectItem>
-                          <SelectItem value="men">Men's</SelectItem>
-                          <SelectItem value="kids">Kids</SelectItem>
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
+            <Select
+                value={form.category}   // bind value
+                onValueChange={(val) => setForm({ ...form, category: val })} // update state
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select a category" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    <SelectLabel>Categories</SelectLabel>
+                    <SelectItem value="women">Women</SelectItem>
+                    <SelectItem value="men">Men's</SelectItem>
+                    <SelectItem value="kids">Kids</SelectItem>
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
+
 
 
             </div>
@@ -133,7 +174,7 @@ const handleImageUpload = (e) => {
                 className="bg-white  text-gray-800 border-gray-300 focus:border-black"
               />
               {form.images.length > 0 && (
-                <div className="grid grid-cols-4 gap-2 mt-2">
+                <div className="grid grid-cols-4 gap-2 sm:gap-4 mt-2">
                   {form.images.map((img, i) => (
                     <img
                       key={i}

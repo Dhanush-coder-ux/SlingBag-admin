@@ -1,7 +1,36 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "../components/ui/button";
+import axios from "axios";
 
-const ListProduct = ({ products, onEdit, onDelete }) => {
+const ListProduct = () => {
+    const backend_url = import.meta.env.VITE_BACKEND_URL;
+  const [products, setProducts] = useState([]);
+
+      useEffect(() => {
+  axios
+    .get(`${backend_url}/product`)
+    .then((res) => {
+     
+      const data = Array.isArray(res.data) ? res.data : res.data.products;
+      setProducts(data || []);
+    })
+    .catch((err) => console.error("Error fetching products:", err));
+}, [backend_url]);
+
+  const handleDelete = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this product?")) return;
+
+    try {
+      await axios.delete(`${backend_url}/product`,
+        {data:{product_id:id}}
+      );
+      setProducts(products.filter((p) => p.id !== id));
+    } catch (err) {
+      console.error("Error deleting product:", err);
+      alert("Failed to delete product.");
+    }
+  }
+
   return (
     <div className="w-full p-4 sm:p-6">
       <h2 className="text-2xl font-semibold text-gray-800 mb-4">
@@ -31,16 +60,12 @@ const ListProduct = ({ products, onEdit, onDelete }) => {
                   key={index}
                   className="hover:bg-gray-50 transition-colors"
                 >
-                  {/* Image */}
-                  <td className="py-3 px-4">
-                    {product.images && product.images.length > 0 ? (
+                      <td className="py-3 px-4">
+                    {product.image_urls && product.image_urls.length > 0 ? (
                       <img
-                        src={
-                          typeof product.images[0] === "string"
-                            ? product.images[0] 
-                            : URL.createObjectURL(product.images[0]) 
-                        }
-                        alt={product.title}
+                        src={product.image_urls[0]}
+                        
+                        
                         className="w-14 h-14 object-cover rounded-md border border-gray-200"
                       />
                     ) : (
@@ -50,10 +75,10 @@ const ListProduct = ({ products, onEdit, onDelete }) => {
                     )}
                   </td>
 
-                  {/* Name */}
+              
                   <td className="py-3 px-4 font-medium">{product.title}</td>
 
-                  {/* Price */}
+                 
                   <td className="py-3 px-4">₹{product.price}</td>
 
                   {/* Actions */}
@@ -61,14 +86,14 @@ const ListProduct = ({ products, onEdit, onDelete }) => {
                     <Button
                       size="sm"
                       className="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1 rounded-lg"
-                      onClick={() => onEdit(product)}
+                      onClick={() =>(product.id)}
                     >
                       Edit
                     </Button>
                     <Button
                       size="sm"
                       className="bg-red-600 hover:bg-red-500 text-white px-3 py-1 rounded-lg"
-                      onClick={() => onDelete(product)}
+                      onClick={() => handleDelete(product.id)}
                     >
                       Delete
                     </Button>
