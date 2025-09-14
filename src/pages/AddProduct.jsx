@@ -25,6 +25,7 @@ import {
 
 const AddProduct = () => {
    const backend_url =import.meta.env.VITE_BACKEND_URL;
+
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -56,7 +57,7 @@ const handleImageUpload = (e) => {
     formData.append("description", form.description);
     formData.append("price", form.price);
     formData.append("category", form.category);
-    formData.append("latest", form.latest);
+    formData.append("is_latest", form.latest);
     form.images.forEach((image, index) => {
       formData.append(`images`, image);
     });
