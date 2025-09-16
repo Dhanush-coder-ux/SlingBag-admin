@@ -25,18 +25,22 @@ const OrderControl = () => {
     fetchAllOrders();
   }, []);
 
-  // const handleStatusChange = async (id, newStatus) => {
-  //   try {
-  //     await axios.put(`${backend_url}/orders/${id}`, { status: newStatus });
-  //     setOrders((prevOrders) =>
-  //       prevOrders.map((o) =>
-  //         o.id === id ? { ...o, status: newStatus } : o
-  //       )
-  //     );
-  //   } catch (err) {
-  //     console.error("Failed to update status:", err.message);
-  //   }
-  // };
+  const handleStatusChange = async (id, newStatus) => {
+    try {
+      const res = await axios.put(`${backend_url}/order/status`, { order_id:id,order_status: newStatus });
+      setOrders((prevOrders) =>
+        prevOrders.map((o) =>
+          o.id === id ? { ...o, status: newStatus } : o
+        )
+      );
+      if(res.status!=200){
+        console.log(res.data);
+        
+      }
+    } catch (err) {
+      console.error("Failed to update status:", err.message);
+    }
+  };
 
   return (
     <div className="p-6">
@@ -137,7 +141,6 @@ const OrderControl = () => {
                   <option value="waiting">Waiting</option>
                   <option value="canceled">Canceled</option>
                   <option value="order placed">Order Placed</option>
-                  <option value="packing">Packing</option>
                   <option value="shipped">Shipped</option>
                   <option value="out for delivery">Out for Delivery</option>
                   <option value="delivered">Delivered</option>
