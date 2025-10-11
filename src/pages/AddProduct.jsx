@@ -6,8 +6,6 @@ import { Textarea } from "../components/ui/textarea";
 import { Switch } from "../components/ui/switch";
 import { Label } from "../components/ui/label";
 import { motion } from "framer-motion";
-import axios from "axios";
-
 
 import {
   Select,
@@ -18,13 +16,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../components/ui/select"
+import { useNetWorkCalls } from "../Utils/NetworkCalls";
 
 
 
 
 
 const AddProduct = () => {
-   const backend_url =import.meta.env.VITE_BACKEND_URL;
+  const backend_url =import.meta.env.VITE_BACKEND_URL;
+  const {netWorkCalls}=useNetWorkCalls()
 
   const [form, setForm] = useState({
     title: "",
@@ -35,22 +35,22 @@ const AddProduct = () => {
     latest: false,
   });
 
+  const [isLoading,setIsLoading]=useState(false)
+
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-const handleImageUpload = (e) => {
-  const files = Array.from(e.target.files);
-
- 
-  setForm((prev) => ({
-    ...prev,
-    images: [...prev.images, ...files],
-  }));
-};
+  const handleImageUpload = (e) => {
+    const files = Array.from(e.target.files);
+    setForm((prev) => ({
+      ...prev,
+      images: [...prev.images, ...files],
+    }));
+  };
 
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const formData = new FormData();
     formData.append("title", form.title);
@@ -61,39 +61,23 @@ const handleImageUpload = (e) => {
     form.images.forEach((image, index) => {
       formData.append(`images`, image);
     });
-
-    axios.post(`${backend_url}/product`, formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
-    }).then((response) => {
-      console.log("Product added successfully:", response.data);
-      setForm({
-        title: "",
-        description: "",
-        price: "",
-        category: "",
-        images: [],
-        latest: false,
-      });
-    }).catch((error) => {
-  if (error.response) {
-    console.error("Backend error:", error.response.data);
-  } else {
-    console.error("Axios error:", error.message);
-  }
-});
-
-
-
-    
-  
-   
-  };
+    setIsLoading(true)
+    const res = await netWorkCalls({method:'post',path:'/product',data:formData,isForForm:true})
+    setIsLoading(false)
+    console.log("Product added successfully:", res);
+    setForm({
+      title: "",
+      description: "",
+      price: "",
+      category: "",
+      images: [],
+      latest: false,
+    });
+};
 
   return (
     <motion.div
-      className="min-h-screen  flex items-center justify-center p-6 bg-gray-100"
+      className="flex items-center justify-center m-5"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
     >
@@ -106,7 +90,7 @@ const handleImageUpload = (e) => {
           <form onSubmit={handleSubmit} className="space-y-4">
            
             <div>
-              <Label className="text-gray-700  my-4">Product Title</Label>
+              <Label className="text-gray-700 my-4">Product Title</Label>
               <Input
                 name="title"
                 value={form.title}
@@ -203,7 +187,7 @@ const handleImageUpload = (e) => {
               type="submit"
               className="w-full  bg-black hover:bg-gray-800 text-white rounded-xl py-2"
             >
-              Add Product
+              {isLoading? 'Adding product...' : 'Add Product'}
             </Button>
           </form>
         </CardContent>

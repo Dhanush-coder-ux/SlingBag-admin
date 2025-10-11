@@ -1,4 +1,3 @@
-
 import './App.css'
 import {Route, Routes} from 'react-router-dom'
 import NavBar from './components/NavBar'
@@ -14,7 +13,7 @@ import { useState } from 'react'
 
 function App() {
 
-    const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState([]);
 
   const handleAdd = (newProduct) => {
     setProducts((prev) => [...prev, newProduct]);
@@ -38,11 +37,10 @@ function App() {
         {isDesktop && <SideBar/> }
       <div className='w-[70%] mx-auto  max-sm:w-full my-8 text-gray-500 text-base'>
           <Routes>
-          <Route path='/add' element={<AddProduct onAdd={handleAdd}/>} />
-          <Route path='/list' element={<ListProduct products={products}
-        onEdit={handleEdit}
-        onDelete={handleDelete}/>} />
-          <Route path='/orders' element={<OrderControl />} />
+            <Route path='/' element={<AddProduct/>} />
+            <Route path='/add' element={<AddProduct onAdd={handleAdd}/>} />
+            <Route path='/list' element={<ListProduct products={products} onEdit={handleEdit} onDelete={handleDelete}/>} />
+            <Route path='/orders' element={<OrderControl />} />
         </Routes>
       </div>
      

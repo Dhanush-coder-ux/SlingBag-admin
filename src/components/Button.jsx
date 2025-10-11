@@ -1,5 +1,16 @@
 import { NavLink } from "react-router-dom"
 
+
+
+export const Button = ({ text, className = "", id, onClick }) => {
+  return (
+    <div id={id} onClick={onClick} className={`font-semibold cursor-pointer rounded-full shadow-lg transition-all duration-300 hover:scale-105 hover:shadow-xl ${className}`} >
+      <span className="relative z-10">{text}</span>
+    </div>
+  );
+};
+
+
 const NavigationButton=({ label , icon , route, canShowBadge, badgeCount }) =>{
   
   return (
@@ -21,3 +32,4 @@ const NavigationButton=({ label , icon , route, canShowBadge, badgeCount }) =>{
   )
 }
 export default NavigationButton
+

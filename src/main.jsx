@@ -3,12 +3,15 @@ import { createRoot } from 'react-dom/client'
 
 import App from './App.jsx'
 import { BrowserRouter } from 'react-router-dom'
+import { LoginContextProvider } from './Contexts/LoginContext.jsx'
 
 createRoot(document.getElementById('root')).render(
   <BrowserRouter>
-    <StrictMode>
-    <App />
-  </StrictMode>
+    <LoginContextProvider>
+      <StrictMode>
+        <App />
+      </StrictMode>
+    </LoginContextProvider>
   </BrowserRouter>
 
 )

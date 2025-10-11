@@ -1,24 +1,20 @@
 import axios from "axios";
 import Title from "../components/Tittle";
 import React, { useEffect, useState } from "react";
+import { useNetWorkCalls } from "../Utils/NetworkCalls";
 
 const OrderControl = () => {
   const backend_url = import.meta.env.VITE_BACKEND_URL;
+  const {netWorkCalls}=useNetWorkCalls()
   const [orders, setOrders] = useState([]);
   const rupees = "\u20B9";
 
   const fetchAllOrders = async () => {
-    try {
-      const response = await axios.get(`${backend_url}/orders`);
-      if (response.status === 200) {
-        setOrders(response.data);
-        console.log(response.data);
-      } else {
-        console.error(response.data.message);
-      }
-    } catch (error) {
-      console.error(error.message);
+    const res=await netWorkCalls({method:'get',path:'/orders?all=true'})
+    if (res){
+      setOrders(res);
     }
+    
   };
 
   useEffect(() => {
@@ -26,19 +22,13 @@ const OrderControl = () => {
   }, []);
 
   const handleStatusChange = async (id, newStatus) => {
-    try {
-      const res = await axios.put(`${backend_url}/order/status`, { order_id:id,order_status: newStatus });
+    const res=await netWorkCalls({method:'put',path:'/order/status',data:{ order_id:id,order_status: newStatus }})
+    if (res){
       setOrders((prevOrders) =>
         prevOrders.map((o) =>
           o.id === id ? { ...o, status: newStatus } : o
         )
       );
-      if(res.status!=200){
-        console.log(res.data);
-        
-      }
-    } catch (err) {
-      console.error("Failed to update status:", err.message);
     }
   };
 

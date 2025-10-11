@@ -1,33 +1,29 @@
 import React, { useEffect, useState } from "react";
 import { Button } from "../components/ui/button";
 import axios from "axios";
+import { useNetWorkCalls } from "../Utils/NetworkCalls";
 
 const ListProduct = () => {
-    const backend_url = import.meta.env.VITE_BACKEND_URL;
+  const backend_url = import.meta.env.VITE_BACKEND_URL;
+  const {netWorkCalls}=useNetWorkCalls()
   const [products, setProducts] = useState([]);
 
-      useEffect(() => {
-  axios
-    .get(`${backend_url}/product`)
-    .then((res) => {
-     
-      const data = Array.isArray(res.data) ? res.data : res.data.products;
-      setProducts(data || []);
-    })
-    .catch((err) => console.error("Error fetching products:", err));
-}, [backend_url]);
+  const getProducts=async()=>{
+    const res=await netWorkCalls({method:'get',path:'/products',ignoreCookie:true})
+    if (res){
+      setProducts(res.products)
+    }
+  }
+
+  useEffect(() => {
+    getProducts()
+  }, []);
 
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this product?")) return;
-
-    try {
-      await axios.delete(`${backend_url}/product`,
-        {data:{product_id:id}}
-      );
+    const res=await netWorkCalls({method:'delete',path:`/product?product_id=${id}`})
+    if (res){
       setProducts(products.filter((p) => p.id !== id));
-    } catch (err) {
-      console.error("Error deleting product:", err);
-      alert("Failed to delete product.");
     }
   }
 
