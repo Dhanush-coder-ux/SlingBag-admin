@@ -4,7 +4,7 @@ import Cookies from 'js-cookie';
 import { jwtDecode } from 'jwt-decode';
 import { useContext } from 'react';
 
-const backend_url = import.meta.env.VITE_BACKEND_URL;
+export const backend_url = import.meta.env.VITE_BACKEND_URL;
 
 export const useNetWorkCalls = () => {
     const {logout} = useContext(LoginContext)
