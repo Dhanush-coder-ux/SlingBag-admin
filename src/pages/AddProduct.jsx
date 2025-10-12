@@ -15,16 +15,12 @@ import {
   SelectLabel,
   SelectTrigger,
   SelectValue,
-} from "../components/ui/select"
+} from "../components/ui/select";
 import { useNetWorkCalls } from "../Utils/NetworkCalls";
 
-
-
-
-
 const AddProduct = () => {
-  const backend_url =import.meta.env.VITE_BACKEND_URL;
-  const {netWorkCalls}=useNetWorkCalls()
+  const backend_url = import.meta.env.VITE_BACKEND_URL;
+  const { netWorkCalls } = useNetWorkCalls();
 
   const [form, setForm] = useState({
     title: "",
@@ -35,7 +31,7 @@ const AddProduct = () => {
     latest: false,
   });
 
-  const [isLoading,setIsLoading]=useState(false)
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -49,6 +45,12 @@ const AddProduct = () => {
     }));
   };
 
+  const handleRemoveImage = (index) => {
+    setForm((prev) => ({
+      ...prev,
+      images: prev.images.filter((_, i) => i !== index),
+    }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -58,22 +60,34 @@ const AddProduct = () => {
     formData.append("price", form.price);
     formData.append("category", form.category);
     formData.append("is_latest", form.latest);
-    form.images.forEach((image, index) => {
-      formData.append(`images`, image);
+    form.images.forEach((image) => {
+      formData.append("images", image);
     });
-    setIsLoading(true)
-    const res = await netWorkCalls({method:'post',path:'/product',data:formData,isForForm:true})
-    setIsLoading(false)
-    console.log("Product added successfully:", res);
-    setForm({
-      title: "",
-      description: "",
-      price: "",
-      category: "",
-      images: [],
-      latest: false,
-    });
-};
+
+    setIsLoading(true);
+
+    try {
+      const res = await netWorkCalls({
+        method: "post",
+        path: "/product",
+        data: formData,
+        isForForm: true,
+      });
+      console.log("Product added successfully:", res);
+      setForm({
+        title: "",
+        description: "",
+        price: "",
+        category: "",
+        images: [],
+        latest: false,
+      });
+    } catch (err) {
+      console.error("Error adding product:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <motion.div
@@ -88,7 +102,6 @@ const AddProduct = () => {
           </h2>
 
           <form onSubmit={handleSubmit} className="space-y-4">
-           
             <div>
               <Label className="text-gray-700 my-4">Product Title</Label>
               <Input
@@ -100,9 +113,8 @@ const AddProduct = () => {
               />
             </div>
 
-            
             <div>
-              <Label className="text-gray-700  my-4">Description</Label>
+              <Label className="text-gray-700 my-4">Description</Label>
               <Textarea
                 name="description"
                 value={form.description}
@@ -113,9 +125,8 @@ const AddProduct = () => {
               />
             </div>
 
-          
             <div>
-              <Label className="text-gray-700  my-4">Price (₹)</Label>
+              <Label className="text-gray-700 my-4">Price (₹)</Label>
               <Input
                 type="number"
                 name="price"
@@ -127,10 +138,10 @@ const AddProduct = () => {
             </div>
 
             <div>
-             <Label className="text-gray-700 my-4">Category</Label>
-            <Select
-                value={form.category}   // bind value
-                onValueChange={(val) => setForm({ ...form, category: val })} // update state
+              <Label className="text-gray-700 my-4">Category</Label>
+              <Select
+                value={form.category}
+                onValueChange={(val) => setForm({ ...form, category: val })}
               >
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select a category" />
@@ -144,50 +155,87 @@ const AddProduct = () => {
                   </SelectGroup>
                 </SelectContent>
               </Select>
-
-
-
             </div>
 
             <div>
-              <Label  className="text-gray-700 my-4">Upload Images</Label>
-              <Input
-                type="file"
-                multiple
-                accept="image/*"
-                onChange={handleImageUpload}
-                className="bg-white  text-gray-800 border-gray-300 focus:border-black"
-              />
+              <Label className="text-gray-700 my-4">Upload Images</Label>
+  <input
+    type="file"
+    multiple
+    accept="image/*"
+    onChange={handleImageUpload}
+    className="hidden"
+    id="file-upload"
+  />
+
+  {/* Custom button to trigger input */}
+  <label
+    htmlFor="file-upload"
+    className="px-4 py-2  bg-black text-white rounded-lg cursor-pointer hover:bg-gray-800"
+  >
+    Choose Images
+  </label>
               {form.images.length > 0 && (
-                <div className="grid grid-cols-4 gap-2 sm:gap-4 mt-2">
+                <div className="grid grid-cols-8 gap-y-2 py-4 g max-sm:grid-cols-4 mt-2">
                   {form.images.map((img, i) => (
-                    <img
-                      key={i}
-                      src={URL.createObjectURL(img)}
-                      alt="preview"
-                      className="w-16 h-16 rounded-lg object-cover border border-gray-300"
-                    />
+                    <div key={i} className="relative w-16 h-16">
+                      <img
+                        src={URL.createObjectURL(img)}
+                        alt="preview"
+                        className="w-full h-full rounded-lg object-cover border border-gray-300"
+                      />
+                      {/* X button */}
+                      <button
+                        type="button"
+                        className="absolute top-[-6px] right-[-6px] bg-red-600 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs shadow-lg hover:bg-red-700 transition"
+                        onClick={() => handleRemoveImage(i)}
+                      >
+                        ×
+                      </button>
+                    </div>
                   ))}
                 </div>
               )}
             </div>
 
-            <div className="flex items-center  my-4 gap-3">
+            <div className="flex items-center my-4 gap-3">
               <Switch
                 checked={form.latest}
-                onCheckedChange={(val) =>
-                  setForm({ ...form, latest: val })
-                }
+                onCheckedChange={(val) => setForm({ ...form, latest: val })}
               />
               <Label className="text-gray-700">Mark as Latest</Label>
             </div>
 
-           
             <Button
               type="submit"
-              className="w-full  bg-black hover:bg-gray-800 text-white rounded-xl py-2"
+              disabled={isLoading}
+              className={`w-full bg-black hover:bg-gray-800 text-white rounded-xl py-2 flex justify-center items-center gap-2 ${
+                isLoading ? "opacity-70 cursor-not-allowed" : ""
+              }`}
             >
-              {isLoading? 'Adding product...' : 'Add Product'}
+              {isLoading && (
+                <svg
+                  className="animate-spin h-5 w-5 text-white"
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8v8H4z"
+                  ></path>
+                </svg>
+              )}
+              {isLoading ? "Adding..." : "Add Product"}
             </Button>
           </form>
         </CardContent>
