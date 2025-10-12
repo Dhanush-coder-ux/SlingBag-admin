@@ -150,7 +150,7 @@ const AddProduct = () => {
                   <SelectGroup>
                     <SelectLabel>Categories</SelectLabel>
                     <SelectItem value="women">Women</SelectItem>
-                    <SelectItem value="men">Men's</SelectItem>
+                    <SelectItem value="men">Men</SelectItem>
                     <SelectItem value="kids">Kids</SelectItem>
                   </SelectGroup>
                 </SelectContent>
