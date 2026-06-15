@@ -37,6 +37,18 @@ const OrderControl = () => {
     }
   };
 
+  const handleDeleteOrder = async (id) => {
+    if (!window.confirm("Are you sure you want to delete this order?")) return;
+    try {
+      const res = await netWorkCalls({ method: 'delete', path: `/order?order_id=${id}` });
+      if (res) {
+        setOrders(prevOrders => prevOrders.filter(o => o.id !== id));
+      }
+    } catch (err) {
+      console.error("Failed to delete order:", err);
+    }
+  };
+
   return (
     <div className="p-6">
       <Title text1={"Orders"}  divClassName={'py-6 text-2xl font-semibold'} />
@@ -86,15 +98,26 @@ const OrderControl = () => {
                   <h2 className="text-lg font-semibold text-gray-800">
                     Order #{order.id}
                   </h2>
-                  <span
-                    className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                      order.status === "delivered"
-                        ? "bg-green-100 text-green-700"
-                        : "bg-yellow-100 text-yellow-700"
-                    }`}
-                  >
-                    {order.status}
-                  </span>
+                  <div className="flex gap-2">
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                        order.payment_method === "Razorpay"
+                          ? "bg-blue-100 text-blue-700"
+                          : "bg-purple-100 text-purple-700"
+                      }`}
+                    >
+                      {order.payment_method || "COD"}
+                    </span>
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                        order.status === "delivered"
+                          ? "bg-green-100 text-green-700"
+                          : "bg-yellow-100 text-yellow-700"
+                      }`}
+                    >
+                      {order.status}
+                    </span>
+                  </div>
                 </div>
 
                 <div className="space-y-3">
@@ -143,18 +166,26 @@ const OrderControl = () => {
                   <p className="text-lg font-bold text-gray-800">
                     Total: {rupees} {totalPrice}
                   </p>
-                  <select
-                    className="p-2 border rounded-lg font-medium bg-gray-50 hover:bg-gray-100"
-                    value={order.status}
-                    onChange={(e) => handleStatusChange(order.id, e.target.value)}
-                  >
-                    <option value="waiting">Waiting</option>
-                    <option value="canceled">Canceled</option>
-                    <option value="order placed">Order Placed</option>
-                    <option value="shipped">Shipped</option>
-                    <option value="out for delivery">Out for Delivery</option>
-                    <option value="delivered">Delivered</option>
-                  </select>
+                  <div className="flex gap-3 items-center">
+                    <select
+                      className="p-2 border rounded-lg font-medium bg-gray-50 hover:bg-gray-100"
+                      value={order.status}
+                      onChange={(e) => handleStatusChange(order.id, e.target.value)}
+                    >
+                      <option value="waiting">Waiting</option>
+                      <option value="canceled">Canceled</option>
+                      <option value="order placed">Order Placed</option>
+                      <option value="shipped">Shipped</option>
+                      <option value="out for delivery">Out for Delivery</option>
+                      <option value="delivered">Delivered</option>
+                    </select>
+                    <button
+                      className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-medium"
+                      onClick={() => handleDeleteOrder(order.id)}
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
               </div>
             );

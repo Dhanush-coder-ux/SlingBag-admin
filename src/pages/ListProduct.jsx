@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react"; 
+import { useNavigate } from "react-router-dom";
 import { Button } from "../components/ui/button";
 import { useNetWorkCalls } from "../Utils/NetworkCalls";
 
@@ -7,6 +8,7 @@ const ListProduct = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true); // Loading state
   const [deletingId, setDeletingId] = useState(null); // Track product being deleted
+  const navigate = useNavigate();
 
   const getProducts = async () => {
     setLoading(true);
@@ -101,7 +103,7 @@ const ListProduct = () => {
                     <Button
                       size="sm"
                       className="bg-blue-600 hover:bg-blue-500 text-white px-3 py-1 rounded-lg"
-                      onClick={() => console.log("Edit product", product.id)}
+                      onClick={() => navigate(`/edit/${product.id}`)}
                     >
                       Edit
                     </Button>

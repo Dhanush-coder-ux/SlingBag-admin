@@ -3,17 +3,19 @@ import { Button } from "./Button";
 import { LoginContext } from "../Contexts/LoginContext";
 import { useSearchParams } from "react-router-dom";
 import Cookies from "js-cookie";
+import LoginModal from "./LoginModal";
 
 const NavBar = () => {
   const [searchParams]=useSearchParams();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isDropdownOpen, setDropdownOpen] = useState(false);
+  const [isModalOpen, setModalOpen] = useState(false);
   const [isImageError, setImageError] = useState(false);
   const userProfile = Cookies.get("user_profile");
   const userName = Cookies.get("user_name");
   const dropdownRef = useRef(null);
-  const [isLoading,setIsLoading]=useState(false)
-  const {login,logout,getLoginCredentials,checkIsUserLoggedIn,isLoggedIn}=useContext(LoginContext)
+  
+  const {logout,getLoginCredentials,checkIsUserLoggedIn,isLoggedIn}=useContext(LoginContext)
 
   useEffect(()=>{
     checkIsUserLoggedIn()
@@ -38,7 +40,18 @@ const NavBar = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  useEffect(() => {
+    const hasToken = Cookies.get("token");
+    if (!hasToken) {
+      const timer = setTimeout(() => {
+        setModalOpen(true);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
   return (
+    <>
     <div
       className={`sticky top-0 z-50 flex items-center justify-between py-3 px-[5%] transition-all duration-300 
         ${isScrolled ? "bg-white/40 backdrop-blur-md shadow-sm" : "bg-transparent"}`}
@@ -88,13 +101,15 @@ const NavBar = () => {
               </div>
             ) : (
               <Button
-                text={isLoading ? "SignIn...":"Sign In"}
-                onClick={() => {setIsLoading(true); login(); setIsLoading(false);}}
+                text="Sign In"
+                onClick={() => setModalOpen(true)}
                 className="bg-black px-6 py-3 text-white"
               />
             )}
           </div>
     </div>
+    <LoginModal isOpen={isModalOpen} onClose={() => setModalOpen(false)} />
+    </>
   );
 };
 

@@ -11,6 +11,37 @@ export const LoginContextProvider = (props) => {
     const [isLoggedIn,setIsLoggedIn]=useState(false)
     const navigateTo=useNavigate()
 
+    const sendOtp = async (email) => {
+        try {
+            const res = await axios.post(`${backend_url}/auth/otp/send`, { email });
+            return res.status === 200;
+        } catch (e) {
+            console.error("Error sending OTP: ", e);
+            return false;
+        }
+    }
+
+    const verifyOtp = async (email, otp) => {
+        try {
+            const res = await axios.post(`${backend_url}/auth/admin/otp/verify`, { email, otp });
+            if (res.status === 200) {
+                const data = res.data;
+                // Admin frontend expects "token"
+                Cookies.set("token", data.access_token);
+                Cookies.set('user_name', data.user_name);
+                Cookies.set('user_profile', data.profile_picture);
+                Cookies.set('role', data.role);
+                setIsLoggedIn(true);
+                return { success: true };
+            }
+            return { success: false, error: "Invalid response" };
+        } catch (e) {
+            console.error("Error verifying OTP: ", e);
+            const errorMsg = e.response?.data?.detail || "Invalid or expired OTP.";
+            return { success: false, error: errorMsg };
+        }
+    }
+
     const login=async()=>{
         console.log("on login");
         
@@ -76,7 +107,7 @@ export const LoginContextProvider = (props) => {
             }
     }
 
-    const values={login,logout,getLoginCredentials,checkIsUserLoggedIn,isLoggedIn,setIsLoggedIn}
+    const values={login,logout,getLoginCredentials,checkIsUserLoggedIn,isLoggedIn,setIsLoggedIn, sendOtp, verifyOtp}
 
     return (
         <LoginContext.Provider value={values}>
